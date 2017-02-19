@@ -17,12 +17,7 @@ class Request {
     newParts = newParts.join(' ');
     newParts = newParts.split('\r\n');
     newParts = newParts.slice(1);
-    //console.log(newParts);
-    //newParts = newParts.join('\r\n');
-    //newParts = newParts.split(':');
-    //console.log(newParts.length);
-    //console.log(newParts);
-    let header = {};
+    let headers = {};
     let i =0;
     for(i; i<newParts.length; i++){
       let str ='';
@@ -33,12 +28,12 @@ class Request {
         if(newParts[i][j]!==":"){
           str+= newParts[i][j];
         }else{
-          header[str] = newParts[i].slice(j+2);
+          headers[str] = newParts[i].slice(j+2);
           break;
         }
       }
     }
-    this.header = header;
+    this.headers = headers;
     let body;
     if(newParts[i+1]===undefined){
       body = '';
@@ -50,9 +45,9 @@ class Request {
   toString(){
     let s = '';
     s+= this.method + " " + this.path + " " + "HTTP/1.1\r\n";
-    for( const val in this.header){
-      if(this.header.hasOwnProperty(val)){
-        s+= val + ": " + this.header[val]+ "\r\n";
+    for( const val in this.headers){
+      if(this.headers.hasOwnProperty(val)){
+        s+= val + ": " + this.headers[val]+ "\r\n";
       }
     }
     s += '\r\n';
@@ -71,7 +66,7 @@ const server = net.createServer((socket)=>{
   socket.on('data', (binaryData) => {
     //creates a request Object with the constructor
     const req = new Request(binaryData+'');
-    console.log(req.header);
+    console.log(req.headers);
     socket.end();
   });
 });

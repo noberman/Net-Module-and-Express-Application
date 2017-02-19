@@ -104,4 +104,4 @@ s += 'foo=bar&baz=qux';
 const req = new Request(s);
 
 console.log(req.header);
-console.log(req.header);
+console.log(req.body);

@@ -23,7 +23,7 @@ function mockSocket() {
 
 describe('Request', function() {
 
-    it('parses and http request header informationinto properties', function() {
+    it('parses and http request header information into properties', function() {
         var s = 'GET /foo.html HTTP/1.1\r\n';
         s += 'Host: localhost:8080\r\n';
         s += 'Referer: http://bar.baz/qux.html\r\n';
@@ -43,6 +43,7 @@ describe('Request', function() {
         expect(req.method).to.equal('POST');
         expect(req.path).to.equal('/foo/create');
         expect(req.headers).to.deep.equal({'Host': 'localhost:8080'});
+        //console.log(req.body);
         expect(req.body).to.equal('foo=bar&baz=qux');
     });
 
