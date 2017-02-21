@@ -1,40 +1,3 @@
-class RequestK{
-  constructor(httpRequest){
-    const tokens = httpRequest.split("\r\n");
-    const path = tokens[0].trim().split(" ")[1];
-    const method =tokens[0].trim().split(" ")[0];
-    let i=1;
-    const header={};
-    while(tokens[i]!==""){
-      const temp=tokens[i].trim().split(": ");
-      header[temp[0].trim()] = temp[1].trim();
-      i++;
-
-    }
-    const body = tokens[i+1].trim();
-
-    this.path = path;
-    this.method=method;
-    this.header=header;
-    this.body=body;
-  }
-
-  toString(){
-    let s="";
-    s+=`${this.method} ${this.path} HTTP/1.1\r\n`;
-
-    for(const key in this.headers){
-      if(this.header.hasOwnProperty(key)){
-        s+=`${key}: ${this.headers[key]}\r\n`;
-      }
-    }
-    s+="\r\n";
-    s+=this.body;
-    return s;
-  }
-
-}
-
 class Request {
   constructor(s) {
     const requestParts = s.split(' ');
@@ -94,14 +57,65 @@ class Request {
 
 }
 
+class Response {
 
-let s = 'GET /foo.html HTTP/1.1\r\n';
-s += 'Host: localhost:8080\r\n';
-s += 'Referer: http://bar.baz/qux.html\r\n';
-s += '\r\n';
-s += 'foo=bar&baz=qux';
-
-const req = new Request(s);
-
-console.log(req.header);
-console.log(req.body);
+  constructor(sock){
+    this.sock = sock;
+    this.headers = {};
+    this.body = '';
+    this.statusCode = '';
+  }
+  setHeader(name, value){
+    this.headers[name] = value;
+  }
+  write(data){
+    this.sock.write(data);
+  }
+  end(s){
+    this.sock.write(s);
+    this.sock.end();
+  }
+  send(statusCode, body){
+    this.statusCode = statusCode;
+    this.body = body;
+    this.sock.end(`HTTP/1.1 ${statusCode} OK
+      Content-Type: text/html
+      ${body}`);
+  }
+  writeHead(statusCode){
+    this.statusCode = statusCode;
+    this.write(`HTTP/1.1 ${statusCode} OK
+      Content-Type: text/html`);
+  }
+  redirect(statusCode, url){
+    this.headers.Location = url;
+    if(arguments.length > 1){
+      this.sock.statusCode = statusCode;
+    }
+    this.sock.end(`HTTP/1.1 ${this.statusCode}
+      ${this.headers}`);
+  }
+  toString(){
+    let s= '';
+    let message = '';
+    if(this.sock.statusCode === "200"){
+      message = "OK";
+    }else if(this.sock.statusCode === "404"){
+      message = 'Not Found';
+    }else if(this.sock.statusCode === "500"){
+      message = 'Internal Server Error';
+    }else if(this.sock.statusCode === "400"){
+      message = "Bad Request";
+    }else if(this.sock.statusCode === "301"){
+      message = "Moved Permanently";
+    }else if(this.sock.statusCode === "302"){
+      message = "Found";
+    }else if(this.sock.statusCode === "303"){
+      message = "See Other"
+    }
+    s+= (`HTTP1.1 ${statusCode} ${message}
+      ${headers}
+      ${body}`);
+    return s;
+  }
+}
