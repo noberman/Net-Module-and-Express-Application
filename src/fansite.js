@@ -28,7 +28,7 @@ app.get('/img/bw3.gif', function(req, res){
   res.sendFile('/img/bw3.gif');
 });
 
-app.get('/random', (req, res) => {
+app.get('/random', function(req, res){
     const rnum = Math.floor(Math.random() * 3) + 1;
     let pic = '';
     switch (rnum) {
