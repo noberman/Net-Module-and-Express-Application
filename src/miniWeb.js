@@ -1,7 +1,8 @@
 // miniWeb.js
 // define your Request, Response and App objects here
 // objects that represents an http request and response
-
+const net = require('net');
+const fs = require('fs');
 
 class Request {
   constructor(s) {
@@ -152,12 +153,15 @@ class Response {
       }
     }
     let encoding;
+    //console.log(fileType);
+    //console.log(this.types);
     if(this.types[fileType].split('/')[0] === "text"){
       encoding = 'utf8';
     }else if(this.types[fileType].split('/')[0] === 'image'){
       encoding = null;
     }
       //console.log(filePath);
+      //console.log(encoding);
       fs.readFile(filePath, encoding, (err,data) => {
         if(err){
           //console.log(err);
@@ -184,7 +188,7 @@ class App{
     this.server = net.createServer(this.handleConnection.bind(this));
     this.routes = {};
   }
-  getPath(path, cb){
+  get(path, cb){
     this.routes[path] = cb;
   }
   listen(port,host){
@@ -197,7 +201,7 @@ class App{
     const req = new Request(binaryData+'');
     const res = new Response(sock);
     const path = req.path;
-    if(req.header["Host"] !== "localhost:8080"){
+    if(req.headers["Host"] !== "localhost:8080"){
       res.setHeader("Content-Type", "text/plain");
       res.send(400, "Bad request");
     }else if(this.routes.hasOwnProperty(path)){
@@ -212,9 +216,9 @@ class App{
     console.log(`${req.path} ${req.method} ${res.statusCode} ${res.statusObject[res.statusCode]}`);
   }
 }
+//const app = new App();
 
-const app = new App();
 
 module.exports = {
-  app: app
+  App: App
 }
